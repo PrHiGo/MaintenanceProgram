@@ -5,6 +5,7 @@ namespace MaintenanceProgram.Services;
 internal class MenuService
 {
     private readonly TicketService _ticketService = new TicketService();
+    private readonly UserService _userService = new UserService();
     public async Task MainMenu()
     {
 
@@ -24,11 +25,11 @@ internal class MenuService
                 break;
 
             case "2":
-
+                await ShowTickets();
                 break;
 
             case "3":
-
+                await EditUsers();
                 break;
 
             case "4":
@@ -59,8 +60,26 @@ internal class MenuService
         await _ticketService.CreateTicketAsync(form);
 
         Console.WriteLine($"Ärende {form.Title} har blivit skapat");
+        Console.ReadKey();
     }
 
+    public async Task ShowTickets()
+    {
+        foreach (var tickets in await _ticketService.GetAllAsync())
+        {
+            Console.WriteLine($"{tickets.Id} - {tickets.Title} - {tickets.Created} - {tickets.StatusType.StatusName}");
+        }
+
+        Console.ReadLine();
+
+    }
+
+    public async Task EditUsers()
+    {
+        await _userService.GetAllAsync();
+        Console.ReadKey();
+
+    }
 
 }
 

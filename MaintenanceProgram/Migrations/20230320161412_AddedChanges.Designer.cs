@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MaintenanceProgram.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230320125102_Update new")]
-    partial class Updatenew
+    [Migration("20230320161412_AddedChanges")]
+    partial class AddedChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,31 +24,6 @@ namespace MaintenanceProgram.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("MaintenanceProgram.Models.Entities.AddressEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StreetName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Addresses");
-                });
 
             modelBuilder.Entity("MaintenanceProgram.Models.Entities.CommentEntity", b =>
                 {
@@ -136,9 +111,6 @@ namespace MaintenanceProgram.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -159,8 +131,6 @@ namespace MaintenanceProgram.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AddressId");
 
                     b.HasIndex("UserTypeId");
 
@@ -224,26 +194,13 @@ namespace MaintenanceProgram.Migrations
 
             modelBuilder.Entity("MaintenanceProgram.Models.Entities.UserEntity", b =>
                 {
-                    b.HasOne("MaintenanceProgram.Models.Entities.AddressEntity", "Address")
-                        .WithMany("Users")
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MaintenanceProgram.Models.Entities.UserTypeEntity", "UserType")
                         .WithMany("Users")
                         .HasForeignKey("UserTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Address");
-
                     b.Navigation("UserType");
-                });
-
-            modelBuilder.Entity("MaintenanceProgram.Models.Entities.AddressEntity", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("MaintenanceProgram.Models.Entities.StatusTypeEntity", b =>

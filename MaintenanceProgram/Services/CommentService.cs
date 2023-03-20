@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-using MaintenanceProgram.Contexts;
-using MaintenanceProgram.Models.Entities;
+﻿using MaintenanceProgram.Models.Entities;
 
 namespace MaintenanceProgram.Services;
 

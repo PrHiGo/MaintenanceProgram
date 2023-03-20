@@ -20,7 +20,7 @@ internal class TicketService: GenericService<TicketEntity>
     public override async Task<TicketEntity> GetSingleAsync(Expression<Func<TicketEntity, bool>> predicate)
     {
         var item = await _context.Tickets
-            .Include(x => x.User).ThenInclude(x => x.Address)
+            .Include(x => x.User)
             .Include(x => x.StatusType)
             .Include(x => x.Comments)
             .FirstOrDefaultAsync(predicate);
@@ -33,16 +33,16 @@ internal class TicketService: GenericService<TicketEntity>
         return null!;
     }
 
-    //public async Task<TicketEntity> DeleteTicketAsync(int ticketId)
-    //{
-    //    var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId);
-    //    if (ticketEntity != null)
-    //    {
-    //        return ticketEntity;
-    //    }
+    public async Task<TicketEntity> DeleteTicketAsync(Guid ticketId)
+    {
+        var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId);
+        if (ticketEntity != null)
+        {
+            return ticketEntity;
+        }
 
-    //    return null!;
-    //}
+        return null!;
+    }
 
     public async Task<TicketEntity> CreateTicketAsync(TicketRegistrationForm form)
     {
@@ -60,9 +60,9 @@ internal class TicketService: GenericService<TicketEntity>
                 LastName = form.LastName,
                 Email = form.Email,
                 PhoneNumber = form.PhoneNumber,
+                UserTypeId = 1
             }
         };
-
 
         var statusTypeEntity = await _context.StatusTypes.FirstOrDefaultAsync(x => x.StatusName == "New");
         if (statusTypeEntity != null)
