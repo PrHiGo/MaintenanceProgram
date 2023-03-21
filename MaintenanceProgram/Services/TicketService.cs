@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MaintenanceProgram.Services;
 
-internal class TicketService: GenericService<TicketEntity>
+internal class TicketService : GenericService<TicketEntity>
 {
     private readonly DataContext _context = new DataContext();
     private readonly UserEntity _user = new UserEntity();
@@ -20,7 +20,7 @@ internal class TicketService: GenericService<TicketEntity>
     public override async Task<TicketEntity> GetSingleAsync(Expression<Func<TicketEntity, bool>> predicate)
     {
         var item = await _context.Tickets
-            .Include(x => x.User)
+            .Include(x => x.User).ThenInclude(x => x.UserType)
             .Include(x => x.StatusType)
             .Include(x => x.Comments)
             .FirstOrDefaultAsync(predicate);
@@ -63,6 +63,19 @@ internal class TicketService: GenericService<TicketEntity>
                 UserTypeId = 1
             }
         };
+
+        var userTypeEntity = await _context.UserTypes.FirstOrDefaultAsync(x => x.TypeName == "Customer");
+        if (userTypeEntity != null)
+        {
+            userTypeEntity.TypeName = userTypeEntity.TypeName;
+        }
+        else
+        {
+            ticketEntity.User.UserType = new UserTypeEntity()
+            {
+                TypeName = "Customer"
+            };
+        }
 
         var statusTypeEntity = await _context.StatusTypes.FirstOrDefaultAsync(x => x.StatusName == "New");
         if (statusTypeEntity != null)

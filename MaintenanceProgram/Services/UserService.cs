@@ -16,13 +16,13 @@ internal class UserService : GenericService<UserEntity>
             FirstName = form.FirstName,
             LastName = form.LastName,
             Email = form.Email,
-            PhoneNumber = form.PhoneNumber,
+            PhoneNumber = form.PhoneNumber
         };
 
         var userTypeEntity = await _context.UserTypes.FirstOrDefaultAsync(x => x.TypeName == "Support");
         if (userTypeEntity != null)
         {
-            userEntity.UserTypeId = userTypeEntity.Id;
+            userTypeEntity.TypeName = userTypeEntity.TypeName;
         }
         else
         {
