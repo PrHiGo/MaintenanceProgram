@@ -11,6 +11,7 @@ internal class TicketService : GenericService<TicketEntity>
 {
     private readonly DataContext _context = new DataContext();
     private readonly UserEntity _user = new UserEntity();
+    private readonly UserTypeEntity _userType = new UserTypeEntity();
 
     public override async Task<IEnumerable<TicketEntity>> GetAllAsync()
     {
@@ -38,7 +39,8 @@ internal class TicketService : GenericService<TicketEntity>
         var ticketEntity = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId);
         if (ticketEntity != null)
         {
-            return ticketEntity;
+            _context.Remove(ticketEntity);
+            await _context.SaveChangesAsync();
         }
 
         return null!;
@@ -60,14 +62,13 @@ internal class TicketService : GenericService<TicketEntity>
                 LastName = form.LastName,
                 Email = form.Email,
                 PhoneNumber = form.PhoneNumber,
-                UserTypeId = 1
             }
         };
 
         var userTypeEntity = await _context.UserTypes.FirstOrDefaultAsync(x => x.TypeName == "Customer");
         if (userTypeEntity != null)
         {
-            userTypeEntity.TypeName = userTypeEntity.TypeName;
+            ticketEntity.User.UserTypeId = userTypeEntity.Id;
         }
         else
         {

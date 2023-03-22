@@ -59,7 +59,7 @@ internal class EditSystemService
         Console.Clear();
         foreach (var user in await _userService.GetAllAsync())
         {
-            Console.WriteLine($"{user.FirstName} {user.LastName} - {user.UserTypeId}");
+            Console.WriteLine($"{user.FirstName} {user.LastName} - {user.UserType}");
         }
         Console.ReadLine();
     }

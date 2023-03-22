@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 
 var menu = new MenuService();
 
-while (menu.startProgram)
+while (menu.StartProgram)
 {
     await menu.MainMenu();
 }
