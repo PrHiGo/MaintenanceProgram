@@ -2,10 +2,10 @@
 
 namespace MaintenanceProgram.Services;
 
-internal class EditSystemService
+internal class CreateUserService
 {
     private readonly UserService _userService = new UserService();
-    public async Task EditUserAsync()
+    public async Task UserAdminAsync()
     {
         Console.Clear();
         Console.WriteLine("***** Administration ******");

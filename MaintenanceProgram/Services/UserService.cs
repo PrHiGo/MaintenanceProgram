@@ -22,7 +22,7 @@ internal class UserService : GenericService<UserEntity>
         var userTypeEntity = await _context.UserTypes.FirstOrDefaultAsync(x => x.TypeName == "Support");
         if (userTypeEntity != null)
         {
-            userTypeEntity.TypeName = userTypeEntity.TypeName;
+            userEntity.UserTypeId = userTypeEntity.Id;
         }
         else
         {

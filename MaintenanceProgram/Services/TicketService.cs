@@ -12,6 +12,7 @@ internal class TicketService : GenericService<TicketEntity>
     private readonly DataContext _context = new DataContext();
     private readonly UserEntity _user = new UserEntity();
     private readonly UserTypeEntity _userType = new UserTypeEntity();
+    private readonly CommentService _commentService = new CommentService();
 
     public override async Task<IEnumerable<TicketEntity>> GetAllAsync()
     {
@@ -46,7 +47,7 @@ internal class TicketService : GenericService<TicketEntity>
         return null!;
     }
 
-    public async Task<TicketEntity> CreateTicketAsync(TicketRegistrationForm form)
+    public async Task<TicketEntity> CreateTicketEntityAsync(TicketRegistrationForm form)
     {
         var currentTime = DateTime.Now;
 
@@ -65,7 +66,7 @@ internal class TicketService : GenericService<TicketEntity>
             }
         };
 
-        var userTypeEntity = await _context.UserTypes.FirstOrDefaultAsync(x => x.TypeName == "Customer");
+        var userTypeEntity = await _context.UserTypes.FirstOrDefaultAsync(x => x.TypeName == "Kund");
         if (userTypeEntity != null)
         {
             ticketEntity.User.UserTypeId = userTypeEntity.Id;
@@ -74,11 +75,11 @@ internal class TicketService : GenericService<TicketEntity>
         {
             ticketEntity.User.UserType = new UserTypeEntity()
             {
-                TypeName = "Customer"
+                TypeName = "Kund"
             };
         }
 
-        var statusTypeEntity = await _context.StatusTypes.FirstOrDefaultAsync(x => x.StatusName == "New");
+        var statusTypeEntity = await _context.StatusTypes.FirstOrDefaultAsync(x => x.StatusName == "Ej Påbörjad");
         if (statusTypeEntity != null)
         {
             ticketEntity.StatusTypeId = statusTypeEntity.Id;
@@ -87,13 +88,163 @@ internal class TicketService : GenericService<TicketEntity>
         {
             ticketEntity.StatusType = new StatusTypeEntity()
             {
-                StatusName = "New"
+                StatusName = "Ej Påbörjad"
             };
         }
 
         _context.Add(ticketEntity);
         await _context.SaveChangesAsync();
         return ticketEntity;
+    }
+
+    public async Task NewTicketAsync()
+    {
+        var form = new TicketRegistrationForm();
+
+        Console.Clear();
+        Console.WriteLine("***** Skapa nytt ärende *****");
+
+        Console.WriteLine("Titel:");
+        form.Title = Console.ReadLine() ?? "";
+        Console.WriteLine("Beskrivning:");
+        form.Description = Console.ReadLine() ?? "";
+
+        Console.WriteLine("\n ****Kontaktuppgifter****");
+
+        Console.WriteLine("Förnamn");
+        form.FirstName = Console.ReadLine() ?? "";
+        Console.WriteLine("Efternamn:");
+        form.LastName = Console.ReadLine() ?? "";
+        Console.WriteLine("Email:");
+        form.Email = Console.ReadLine() ?? "";
+        Console.WriteLine("Telefonnummer:");
+        form.PhoneNumber = Console.ReadLine() ?? "";
+
+        await CreateTicketEntityAsync(form);
+
+        Console.WriteLine($"Ärende {form.Title} har blivit skapat");
+        Thread.Sleep(3000);
+    }
+
+    public async Task ShowTicketsAsync()
+    {
+        Console.Clear();
+        foreach (var tickets in await GetAllAsync())
+        {
+            Console.WriteLine(
+                $"ID: {tickets.Id} - {tickets.Title} - {tickets.Created} - {tickets.StatusType.StatusName}");
+        }
+
+        Console.WriteLine("\n ***** Skriv in ID på det ärende du vill hantera *****");
+        try
+        {
+            var result = await GetSingleAsync(x => x.Id == Guid.Parse(Console.ReadLine() ?? ""));
+            Console.Clear();
+
+            Console.WriteLine($"{result.Id}");
+            Console.WriteLine($"Titel: {result.Title}");
+            Console.WriteLine($"Skapad: {result.Created}");
+            Console.WriteLine($"Status: {result.StatusType.StatusName}");
+            Console.WriteLine($"Beskrivning: " +
+                              $"\n {result.Description}");
+            await GetComments();
+            Console.WriteLine($"Senast ändrad: {result.Modified}");
+
+
+            await EditTicketAsync(result.Id);
+        }
+        catch
+        {
+
+            Console.WriteLine("Inget ärende med angivet ID hittades");
+        }
+
+        async Task GetComments()
+        {
+            foreach (var comment in await _commentService.GetAllAsync())
+            {
+                Console.WriteLine($"\nKommentarer: {comment.Comment}" +
+                                  $"\nSkapad: {comment.Created}");
+            }
+        }
+    }
+
+    public async Task EditTicketAsync(Guid ticketId)
+    {
+        Console.WriteLine("\n1. Ta bort ärende");
+        Console.WriteLine($"2. Lägg till kommentar");
+        Console.WriteLine($"3. Uppdatera status");
+
+
+        Int32.TryParse(Console.ReadLine(), out var option);
+        switch (option)
+        {
+            case 1:
+                await DeleteTicketAsync(ticketId);
+                break;
+            case 2:
+                break;
+            case 3:
+                await ChangeStatus();
+                break;
+        }
+
+        async Task ChangeStatus()
+        {
+            string notStarted = "Ej Påbörjad";
+            string pending = "Pågående";
+            string done = "Avslutad";
+
+            Console.WriteLine("\n1. Ej Påbörjad");
+            Console.WriteLine($"2. Pågående");
+            Console.WriteLine($"3. Avslutad");
+
+            Int32.TryParse(Console.ReadLine(), out var option);
+            switch (option)
+            {
+                case 1:
+                    await SetStatusTo(notStarted);
+                    break;
+                case 2:
+                    await SetStatusTo(pending);
+                    break;
+                case 3:
+                    await SetStatusTo(done);
+                    break;
+            }
+
+            async Task SetStatusTo(string newStatus)
+            {
+                var result = await GetSingleAsync(x => x.Id == ticketId);
+
+                if (result != null!)
+                {
+                    if (!string.IsNullOrEmpty(result.User.UserType.TypeName))
+                        result.User.UserType.TypeName = newStatus;
+                }
+
+                var statusTypeEntity =
+                    await _context.StatusTypes.FirstOrDefaultAsync(x => x.StatusName == newStatus);
+                if (statusTypeEntity != null)
+                {
+                    result.StatusTypeId = statusTypeEntity.Id;
+                }
+                else
+                {
+                    result.StatusType = new StatusTypeEntity()
+                    {
+                        StatusName = newStatus
+                    };
+                }
+
+                _context.StatusTypes.Update(result.StatusType);
+                _context.Entry(result).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"Status ändrad till {newStatus}");
+                Thread.Sleep(2000);
+            }
+        }
     }
 }
 
