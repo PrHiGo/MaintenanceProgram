@@ -188,7 +188,6 @@ internal class TicketService : GenericService<TicketEntity>
                 await ChangeStatus();
                 break;
         }
-
         async Task ChangeStatus()
         {
             string notStarted = "Ej Påbörjad";
