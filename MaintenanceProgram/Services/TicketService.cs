@@ -12,7 +12,6 @@ internal class TicketService : GenericService<TicketEntity>
     private readonly DataContext _context = new DataContext();
     private readonly UserEntity _user = new UserEntity();
     private readonly UserTypeEntity _userType = new UserTypeEntity();
-    private readonly CommentService _commentService = new CommentService();
 
     public override async Task<IEnumerable<TicketEntity>> GetAllAsync()
     {
@@ -147,7 +146,6 @@ internal class TicketService : GenericService<TicketEntity>
             Console.WriteLine($"Status: {result.StatusType.StatusName}");
             Console.WriteLine($"Beskrivning: " +
                               $"\n {result.Description}");
-            await GetComments();
             Console.WriteLine($"Senast ändrad: {result.Modified}");
 
 
@@ -159,21 +157,12 @@ internal class TicketService : GenericService<TicketEntity>
             Console.WriteLine("Inget ärende med angivet ID hittades");
         }
 
-        async Task GetComments()
-        {
-            foreach (var comment in await _commentService.GetAllAsync())
-            {
-                Console.WriteLine($"\nKommentarer: {comment.Comment}" +
-                                  $"\nSkapad: {comment.Created}");
-            }
-        }
     }
 
     public async Task EditTicketAsync(Guid ticketId)
     {
         Console.WriteLine("\n1. Ta bort ärende");
-        Console.WriteLine($"2. Lägg till kommentar");
-        Console.WriteLine($"3. Uppdatera status");
+        Console.WriteLine($"2. Uppdatera status");
 
 
         Int32.TryParse(Console.ReadLine(), out var option);
@@ -183,8 +172,6 @@ internal class TicketService : GenericService<TicketEntity>
                 await DeleteTicketAsync(ticketId);
                 break;
             case 2:
-                break;
-            case 3:
                 await ChangeStatus();
                 break;
         }
@@ -244,6 +231,7 @@ internal class TicketService : GenericService<TicketEntity>
                 Thread.Sleep(2000);
             }
         }
+
     }
 }
 

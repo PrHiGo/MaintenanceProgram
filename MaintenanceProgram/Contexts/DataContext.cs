@@ -19,7 +19,7 @@ internal class DataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\thoma\Desktop\Webbutveckling_.NET\Skolarbete\Databashantering\MaintenanceProgram\Maintenance_sql_Db.mdf;Integrated Security=True;Connect Timeout=30");
+        optionsBuilder.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\thoma\OneDrive\Skrivbord\Webbutveckling_.NET\Skolarbete\Databashantering\MaintenanceProgram\MaintenanceProgram\MaintenaceSQL.mdf;Integrated Security=True;Connect Timeout=30");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
