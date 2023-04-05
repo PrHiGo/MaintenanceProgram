@@ -1,7 +1,9 @@
 ﻿using MaintenanceProgram.Services;
+using Microsoft.IdentityModel.Tokens;
 
 var menu = new MenuService();
-while (true)
+
+while (menu.StartProgram)
 {
     await menu.MainMenu();
 }
